@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>CUC VOJ Helper — 高级选项</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; padding: 20px; max-width: 500px; color: #303133; }
+    h1 { font-size: 18px; margin: 0 0 16px; }
+    label { display: block; font-weight: 500; margin: 12px 0 4px; }
+    input[type="text"], input[type="number"] { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid #dcdfe6; border-radius: 4px; font-size: 13px; }
+    .row { display: flex; align-items: center; gap: 8px; }
+    button { padding: 8px 16px; border: none; border-radius: 4px; background: #409eff; color: white; cursor: pointer; font-size: 13px; margin-top: 16px; }
+    button.secondary { background: #f4f4f5; color: #606266; border: 1px solid #dcdfe6; }
+    .muted { color: #909399; font-size: 12px; margin-top: 4px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <h1>CUC VOJ Helper — 高级选项</h1>
+
+  <label for="voj-url">VOJ 服务器地址</label>
+  <input id="voj-url" type="text" placeholder="http://172.18.114.170">
+  <div class="muted">扩展将通过 WebSocket 连接到此地址的 /api/v1/extension/ws。</div>
+
+  <label for="token">配对 Token</label>
+  <input id="token" type="text" placeholder="在 VOJ 个人中心生成的 token">
+  <div class="muted">来自 VOJ → 个人中心 → 「配对浏览器扩展」。</div>
+
+  <label>自动重连</label>
+  <div class="row">
+    <input type="checkbox" id="auto-reconnect">
+    <span>断线后自动重连（推荐）</span>
+  </div>
+
+  <label for="reconnect-backoff">初始重连退避（毫秒）</label>
+  <input id="reconnect-backoff" type="number" min="500" step="500">
+
+  <label for="max-backoff">最大重连退避（毫秒）</label>
+  <input id="max-backoff" type="number" min="1000" step="1000">
+
+  <div>
+    <button id="save">保存</button>
+    <button id="reconnect" class="secondary">立即重连</button>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

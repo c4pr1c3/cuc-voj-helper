@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>CUC VOJ Helper</title>
+  <style>
+    body { width: 320px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; padding: 12px; margin: 0; color: #303133; }
+    h1 { font-size: 15px; margin: 0 0 12px; }
+    .status-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .dot.online { background: #67c23a; }
+    .dot.offline { background: #909399; }
+    .dot.error { background: #f56c6c; }
+    .status-text { font-weight: 500; }
+    .muted { color: #909399; font-size: 12px; margin: 4px 0 12px; }
+    label { display: block; font-weight: 500; margin: 8px 0 4px; }
+    input[type="text"], input[type="password"] { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid #dcdfe6; border-radius: 4px; font-size: 12px; font-family: ui-monospace, monospace; }
+    button { padding: 6px 14px; border: none; border-radius: 4px; background: #409eff; color: white; cursor: pointer; font-size: 12px; }
+    button:hover { background: #66b1ff; }
+    button.secondary { background: #f4f4f5; color: #606266; border: 1px solid #dcdfe6; }
+    button.secondary:hover { background: #e9e9eb; }
+    .actions { display: flex; gap: 8px; margin-top: 12px; }
+    .help { margin-top: 12px; padding-top: 8px; border-top: 1px solid #ebeef5; font-size: 11px; color: #909399; line-height: 1.5; }
+    .help a { color: #409eff; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h1>CUC VOJ Helper</h1>
+
+  <div class="status-row">
+    <span id="dot" class="dot offline"></span>
+    <span id="status-text" class="status-text">未连接</span>
+  </div>
+  <div id="detail" class="muted">检查中...</div>
+
+  <label for="voj-url">VOJ 服务器</label>
+  <input id="voj-url" type="text" placeholder="http://172.18.114.170">
+
+  <label for="token">配对 Token</label>
+  <input id="token" type="password" placeholder="在 VOJ 题库页面右上角生成">
+
+  <div class="actions">
+    <button id="save">保存并连接</button>
+    <button id="options" class="secondary">高级</button>
+  </div>
+
+  <div class="help">
+    Token 获取路径：VOJ → 题库 → 右上角「扩展未连接」徽章 → 生成配对 Token。<br>
+    连接成功后，扩展会代替 VOJ 服务器访问 Codeforces。
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
