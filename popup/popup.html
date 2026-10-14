@@ -20,8 +20,16 @@
     button.secondary { background: #f4f4f5; color: #606266; border: 1px solid #dcdfe6; }
     button.secondary:hover { background: #e9e9eb; }
     .actions { display: flex; gap: 8px; margin-top: 12px; }
-    .help { margin-top: 12px; padding-top: 8px; border-top: 1px solid #ebeef5; font-size: 11px; color: #909399; line-height: 1.5; }
-    .help a { color: #409eff; text-decoration: none; }
+    .section-title { font-weight: 600; margin-top: 16px; padding-top: 10px; border-top: 1px solid #ebeef5; }
+    .bind-row { display: flex; gap: 8px; margin-top: 8px; }
+    .bind-btn { flex: 1; }
+    .bind-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .bind-result { margin-top: 8px; font-size: 12px; line-height: 1.5; padding: 6px 8px; border-radius: 4px; }
+    .bind-result.ok { background: #f0f9eb; color: #67c23a; }
+    .bind-result.err { background: #fef0f0; color: #f56c6c; }
+    .bind-result.warn { background: #fdf6ec; color: #e6a23c; }
+    #fallback-row { margin-top: 8px; }
+    #fallback-row button { margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -44,9 +52,22 @@
     <button id="options" class="secondary">高级</button>
   </div>
 
+  <div class="section-title">账号绑定</div>
+  <div id="bind-hint" class="muted">一键把浏览器里的洛谷 / 牛客登录态绑定到 VOJ，免去手动提取 Cookie。凭证仅上传到您配置的 VOJ 服务器。</div>
+  <div class="bind-row">
+    <button id="bind-luogu" class="bind-btn">绑定洛谷</button>
+    <button id="bind-nowcoder" class="bind-btn">绑定牛客</button>
+  </div>
+  <div id="bind-result" class="bind-result" hidden></div>
+  <div id="fallback-row" hidden>
+    <label for="fallback-username">未能自动识别 OJ 用户名，请手填后重试</label>
+    <input id="fallback-username" type="text" placeholder="该平台上的用户名">
+    <button id="fallback-retry" class="secondary">用此用户名重试</button>
+  </div>
+
   <div class="help">
     Token 获取路径：VOJ → 题库 → 右上角「扩展未连接」徽章 → 生成配对 Token。<br>
-    连接成功后，扩展会代替 VOJ 服务器访问 Codeforces。
+    连接成功后，扩展会代替 VOJ 服务器访问 Codeforces；绑定账号时读取洛谷/牛客 Cookie 并上传到 VOJ。
   </div>
 
   <script src="popup.js"></script>
