@@ -3,3 +3,7 @@
 node_modules/
 .vscode/
 .idea/
+
+# 扩展 e2e 测试环境
+test/.venv/
+test/__pycache__/
