@@ -83,7 +83,8 @@ async function connect() {
 
   const url = buildWsUrl(settings);
   lastWsUrl = url;
-  console.log("[VOJ] connecting to", url);
+  // GitLab #103-1：日志不落 token（完整 WS URL 的 ?token= 是长效配对凭据）
+  console.log("[VOJ] connecting to", url.split("?")[0]);
 
   try {
     ws = new WebSocket(url);
