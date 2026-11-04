@@ -1,5 +1,5 @@
 const DEFAULTS = {
-  vojBaseUrl: "http://172.18.114.170",
+  vojBaseUrl: "https://voj.cuc.edu.cn",
   sessionToken: "",
   autoReconnect: true,
   reconnectBackoffMs: 2000,

@@ -1,43 +1,37 @@
 {
   "manifest_version": 3,
   "name": "CUC VOJ Helper",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "CUC VOJ 助手扩展：在您的浏览器内代为访问 Codeforces，绕过 Cloudflare 人机验证；一键绑定洛谷/牛客账号。",
-
-
   "permissions": [
     "storage",
     "tabs",
     "cookies"
   ],
-
   "optional_host_permissions": [
     "http://*/*",
     "https://*/*"
   ],
   "host_permissions": [
+    "https://voj.cuc.edu.cn/*",
     "https://codeforces.com/*",
     "https://*.voj/*",
     "http://*.voj/*",
     "http://172.18.114.170/*",
     "http://localhost:8090/*"
   ],
-
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
-
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "VOJ Companion"
   },
-
   "options_ui": {
     "page": "options/options.html",
     "open_in_tab": false
   },
-
   "icons": {
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
