@@ -9,6 +9,9 @@ cuc-voj-helper 的 fixture 副本（manifest 把洛谷/牛客域名补丁为声�
   1. 洛谷：无法解析用户名（_uid=e2einvalid 保证 404）→ popup 露出手填
      兜底输入框 → 手填重试 → 绑定成功
   2. 牛客：NOWCODERUID=103（公开 profile）→ 后端自动解析出用户名 → 直接成功
+  3. QOJ：__Host-UOJSESSID=e2einvalid 在 qoj.ac 无效（网络异常同样兜底）
+     → 422 手填兜底 → 绑定成功（voj #120）
+  4. API 侧断言 oj_accounts 行存在
   3. API 侧断言 oj_accounts 行存在
 
 运行（详见同目录 README.md）：
@@ -74,7 +77,7 @@ def make_fixture():
     manifest = json.loads((dst / "manifest.json").read_text())
     manifest["host_permissions"] = sorted(
         set(manifest.get("host_permissions", []))
-        | {"https://*.luogu.com.cn/*", "https://*.nowcoder.com/*"}
+        | {"https://*.luogu.com.cn/*", "https://*.nowcoder.com/*", "https://qoj.ac/*"}
     )
     (dst / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2))
     return dst
@@ -133,12 +136,16 @@ def main():
 
 
             # 假登录态：洛谷 _uid 故意无效（保证解析 404 → 422 兜底分支）；
-            # 牛客 NOWCODERUID=103 是公开 profile（保证自动解析成功分支）。
+            # 牛客 NOWCODERUID=103 是公开 profile（保证自动解析成功分支）；
+            # QOJ __Host-UOJSESSID 故意无效（→422 兜底分支；qoj.ac 不可达时
+            # 后端 QojError 兜底同样返回 None，UI 表现一致）。__Host- 前缀
+            # cookie 强制 host-only + secure + path=/，用 url 形式注入。
             ctx.add_cookies([
                 {"name": "_uid", "value": "e2einvalid", "domain": ".luogu.com.cn", "path": "/", "secure": True},
                 {"name": "__client_id", "value": "e2eclient", "domain": ".luogu.com.cn", "path": "/", "secure": True},
                 {"name": "NOWCODERUID", "value": "103", "domain": ".nowcoder.com", "path": "/", "secure": True},
                 {"name": "NOWCODERCLINETID", "value": "e2enc", "domain": ".nowcoder.com", "path": "/", "secure": True},
+                {"name": "__Host-UOJSESSID", "value": "e2einvalid", "url": "https://qoj.ac/", "path": "/", "secure": True},
             ])
 
             popup = ctx.new_page()
@@ -172,7 +179,21 @@ def main():
             nc_text = popup.text_content("#bind-result")
             step("nowcoder auto-resolve binds", "已绑定 牛客" in nc_text and "嘤嘤" not in "", nc_text)
 
-            # ── 3. API 侧断言 ──
+            # ── 3. QOJ：无效 session → 422 兜底 → 手填成功 ──
+            popup.click("#bind-qoj")
+            popup.wait_for_selector("#fallback-row:not([hidden])", timeout=TIMEOUT_MS)
+            popup.wait_for_selector("#bind-result.warn", timeout=TIMEOUT_MS)
+            popup.screenshot(path=str(evidence_dir / "05-qoj-fallback.png"))
+            step("qoj unresolvable → fallback row shown", True)
+
+            popup.fill("#fallback-username", "e2e_qoj_user")
+            popup.click("#fallback-retry")
+            popup.wait_for_selector("#bind-result.ok", timeout=TIMEOUT_MS)
+            popup.screenshot(path=str(evidence_dir / "06-qoj-bound.png"))
+            qoj_text = popup.text_content("#bind-result")
+            step("qoj manual retry binds", "已绑定 QOJ：e2e_qoj_user" in qoj_text, qoj_text)
+
+            # ── 4. API 侧断言 ──
             rows = api("GET", "/api/v1/users/me/oj-accounts", token=jwt)
             by_type = {r["oj_type"]: r for r in rows}
             step(
@@ -186,9 +207,15 @@ def main():
                 str(by_type),
             )
             step(
+                "api: qoj row = e2e_qoj_user",
+                by_type.get("qoj", {}).get("oj_username") == "e2e_qoj_user",
+                str(by_type),
+            )
+            step(
                 "api: fake cookies flagged invalid",
                 by_type.get("luogu", {}).get("is_valid") is False
-                and by_type.get("nowcoder", {}).get("is_valid") is False,
+                and by_type.get("nowcoder", {}).get("is_valid") is False
+                and by_type.get("qoj", {}).get("is_valid") is False,
                 str(by_type),
             )
         finally:

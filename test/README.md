@@ -2,8 +2,8 @@
 
 加载本扩展的 fixture 副本到 Playwright 自带 Chromium（headless=new，
 无需 xvfb），对 docker compose dev 环境走 popup 完整绑定流。不依赖真实
-OJ 登录——用假 cookie 覆盖「解析失败 → 手填兜底」与「公开 profile 自动
-解析」两条分支链。
+OJ 登录——用假 cookie 覆盖洛谷「解析失败 → 手填兜底」、牛客「公开 profile
+自动解析」与 QOJ「解析失败 → 手填兜底」三条分支链（voj #120）。
 
 ## 运行
 
@@ -27,6 +27,8 @@ cd cuc-voj-helper/test
   声明式 host 权限，绕过 Chrome 原生权限气泡（Playwright 无法点击浏览器
   UI）。生产 manifest 不改动。
 - **假 cookie 策略**：`_uid=e2einvalid` 保证洛谷解析 404（→422 兜底分支）；
-  `NOWCODERUID=103` 是公开 profile（→自动解析成功分支）。
+  `NOWCODERUID=103` 是公开 profile（→自动解析成功分支）；QOJ
+  `__Host-UOJSESSID=e2einvalid` 无效（→422 兜底分支；qoj.ac 不可达时后端
+  `QojError` 兜底同样返回 None，UI 表现一致）。
 - **手动清单不覆盖的部分**：权限气泡的真实交互、真实 OJ 登录态的成功
   绑定——见扩展 README 手动验收清单。

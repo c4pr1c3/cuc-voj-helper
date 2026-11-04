@@ -27,6 +27,13 @@ const OJ_LIST = [
     originPattern: "https://*.nowcoder.com/*",
     requiredCookie: "NOWCODERUID",
   },
+  {
+    key: "qoj",
+    label: "QOJ",
+    domain: "qoj.ac",
+    originPattern: "https://qoj.ac/*",
+    requiredCookie: "__Host-UOJSESSID",
+  },
 ];
 
 const $ = (id) => document.getElementById(id);

@@ -6,7 +6,7 @@
 
 - **A3 路径（题面抓取）**：教师加 CF 题目时，若 FlareSolverr 不可用，VOJ 后端会通过 WebSocket 把抓取请求派发到本扩展；扩展在 CF 域内 fetch HTML，回传给后端解析落库。
 - **CE 详情抓取**：CF 提交判为编译错误（COMPILATION_ERROR）时，VOJ 后端通过扩展调用 CF 内部接口 `/data/submitSource`（登录态 JSON），把编译器报错回传给 VOJ 显示。
-- **一键绑定洛谷 / 牛客**：点扩展 popup 的「绑定洛谷」/「绑定牛客」，扩展读取浏览器里该 OJ 域的 Cookie，经配对 Token 认证的 REST 端点上传到 VOJ；OJ 用户名由后端自动解析，识别失败时在 popup 手填重试。免去 DevTools 手动提取 Cookie（见主仓库 Cookie 教程的「推荐：扩展一键绑定」）。
+- **一键绑定洛谷 / 牛客 / QOJ**：点扩展 popup 的「绑定洛谷」/「绑定牛客」/「绑定 QOJ」，扩展读取浏览器里该 OJ 域的 Cookie，经配对 Token 认证的 REST 端点上传到 VOJ；OJ 用户名由后端自动解析，识别失败时在 popup 手填重试。免去 DevTools 手动提取 Cookie（见主仓库 Cookie 教程的「推荐：扩展一键绑定」）。
 - B2 路径（代码提交）— P1-B2 阶段实现。
 
 ## 一键绑定的配对入口
@@ -22,6 +22,7 @@
 | VOJ 服务器域名 | optional | popup「保存并连接」点击时 | 绕过 CORS 调绑定 REST 端点（自部署任意地址均可） |
 | `*.luogu.com.cn` | optional | 点「绑定洛谷」时 | `chrome.cookies` 读取洛谷登录态 |
 | `*.nowcoder.com` | optional | 点「绑定牛客」时 | `chrome.cookies` 读取牛客登录态 |
+| `qoj.ac` | optional | 点「绑定 QOJ」时 | `chrome.cookies` 读取 QOJ 登录态（`__Host-UOJSESSID`，secure cookie，扩展经 cookies 权限可读） |
 
 这样做的原因：manifest 硬编码新增 host 权限会导致**存量用户更新扩展时被 Chrome 禁用**；optional 权限只在用户点击对应功能时弹一次询问。被拒后不影响其余功能，重新触发对应操作即可再次询问。
 
@@ -46,7 +47,7 @@ Cookie 只在点击绑定的瞬间读取并直接上传到你所配置的 VOJ �
 3. 复制 token，点扩展图标打开 popup。
 4. 填入 VOJ 服务器地址（如 `http://172.18.114.170`）和刚复制的 token，点「保存并连接」（首次会请求 VOJ 站点访问权限，请允许）。
 5. popup 顶部状态变绿「已连接」；同时页面上徽章变绿「扩展在线」。
-6. 一键绑定：在浏览器登录洛谷 / 牛客后，popup 点「绑定洛谷」/「绑定牛客」（首次会请求对应网站访问权限）。
+6. 一键绑定：在浏览器登录洛谷 / 牛客 / QOJ 后，popup 点「绑定洛谷」/「绑定牛客」/「绑定 QOJ」（首次会请求对应网站访问权限；QOJ 需先登录 <https://qoj.ac>，否则 popup 会提示先登录）。
 7. 教师抓 CF 题面：同时在浏览器登录 <https://codeforces.com>（扩展需要 CF 域的 cookie）。
 
 ## 目录结构
@@ -55,7 +56,7 @@ Cookie 只在点击绑定的瞬间读取并直接上传到你所配置的 VOJ �
 cuc-voj-helper/
 ├── manifest.json         MV3 manifest
 ├── background.js         service worker：WS 长连接 + fetch_problem_request / fetch_ce_detail_request 处理
-├── popup/                工具栏点击弹窗（连接配置 + 一键绑定洛谷/牛客）
+├── popup/                工具栏点击弹窗（连接配置 + 一键绑定洛谷/牛客/QOJ）
 │   ├── popup.html
 │   └── popup.js
 ├── options/              高级选项页
@@ -79,12 +80,12 @@ cd test
 .venv/bin/python test_bind_e2e.py
 ```
 
-覆盖：洛谷「解析失败 → 手填兜底 → 绑定成功」、牛客「公开 profile 自动解析 → 直接成功」、API 侧断言。证据截图落主仓库 `e2e-tests/<时间戳>-extbind/`。细节见 `test/README.md`。
+覆盖：洛谷「解析失败 → 手填兜底 → 绑定成功」、牛客「公开 profile 自动解析 → 直接成功」、QOJ「无效 session 解析失败 → 手填兜底 → 绑定成功」、API 侧断言。证据截图落主仓库 `e2e-tests/<时间戳>-extbind/`。细节见 `test/README.md`。
 
 ## 手动验收清单（自动化覆盖不到的部分）
 
 1. **真实 Chrome 权限气泡**：用系统 Chrome/Edge 手动「加载已解压的扩展程序」，走一遍配对 → 点「绑定洛谷」，确认 Chrome 弹出「读取网站数据」询问且允许后绑定成功；再验证拒绝路径（点「阻止」后 popup 提示明确、其余功能不受影响）。
-2. **真实 OJ 登录成功路径**：在真实浏览器登录自己的洛谷账号，一键绑定后 VOJ 用户页出现该账号、状态「有效」，且提交一道题可正常代理判题。
+2. **真实 OJ 登录成功路径**：在真实浏览器登录自己的洛谷 / 牛客 / QOJ 账号，一键绑定后 VOJ 用户页出现该账号、状态「有效」，且提交一道题可正常代理判题（QOJ 绑定取的是 `__Host-UOJSESSID`，可在 qoj.ac DevTools → Application → Cookies 对照）。
 
 > 注：自动化测试用 Playwright 内置 Chromium（品牌 Chrome 137+ 已忽略 `--load-extension`，无法命令行装载扩展），因此真实 Chrome 上的装载与权限气泡交互只能人工验证。
 
